@@ -1,0 +1,4 @@
+../Src/main.c:30:5:main	16008	static
+../Src/main.c:87:6:_delay_ms	24	static
+../Src/main.c:97:6:EXTI0_IRQHandler	4	static
+../Src/main.c:106:6:SingleISR	4	static

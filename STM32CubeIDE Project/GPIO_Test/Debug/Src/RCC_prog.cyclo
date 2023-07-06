@@ -1,0 +1,3 @@
+RCC_prog.c:10:6:RCC_voidSysClkInit	1
+RCC_prog.c:23:6:RCC_voidEnablePerClk	7
+RCC_prog.c:38:6:RCC_voidDisablePerClk	7
