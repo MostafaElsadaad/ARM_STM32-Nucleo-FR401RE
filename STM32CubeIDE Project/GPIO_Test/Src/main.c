@@ -21,19 +21,102 @@
 #include "STD_TYPES.h"
 #include "NVIC_interface.h"
 #include "DMA_interface.h"
+
+#include "FreeRTOS.h"
+#include "FreeRTOSConfig.h"
+#include "task.h"
+#include "semphr.h"
+#include "queue.h"
+#include "event_groups.h"
+
+u8 flag = 0;
+
+u8 ButtonState = 1;
+u8 queuebuffer = 0;
+QueueHandle_t xQueue1;
+EventGroupHandle_t xCreatedEventGroup;
+
+#define ForgetGiveSemaphore pdFALSE
+
+xSemaphoreHandle ButtonSemaphore = NULL;
+
+
 void _delay_ms(u32 ms);
 
 
 void SingleISR();
+void Led(void * pvparam);
+void PushButton(void * pvparam);
+void Led1(){
+	SET_bit(GPIOA_ODR,0);
+}
 
-static u16 i=0;
+void vRedTask(void * pvParameters){
+
+	for( ;; ){
+		vTaskDelay(200);
+		if(flag){
+		SET_bit(GPIOA_ODR,0);
+		SET_bit(GPIOC_ODR,13);
+		flag = 0;
+		}
+		else{
+		CLR_bit(GPIOA_ODR,0);
+		CLR_bit(GPIOC_ODR,13);
+		}
+	}
+}
+/*
+void PushButton(void * pvParameters){
+
+	for( ;; ){
+		vTaskDelay(100);
+		if(GET_bit(GPIOA_IDR,1) == 1){
+			flag = 1;
+		}
+	}
+}
+*/
+
+
+
 int main(void)
 {
 	RCC_voidSysClkInit();
 	RCC_voidEnablePerClk(RCC_AHB1,0);
+
+	SET_bit(GPIOA_MODE,0);
+	CLR_bit(GPIOA_MODE,1);
+	CLR_bit(GPIOA_MODE,2);
+	CLR_bit(GPIOA_MODE,3);
+
+	//CLR_bit(GPIOC_MODE,0);
+	//CLR_bit(GPIOC_MODE,1);
+
+
+	//SET_bit(GPIOC_PUPDR,26);
+	//CLR_bit(GPIOC_PUPDR,27);
+
+	CLR_bit(GPIOA_PUPDR,2);
+	SET_bit(GPIOA_PUPDR,3);
+
+	TaskHandle_t	xPushButton = NULL;
+	TaskHandle_t	xHandleRedLed = NULL;
+
+	xTaskCreate(Led,"Led Task",85,NULL,2,&xHandleRedLed );
+	xTaskCreate(PushButton,"PushButton Task",85,NULL,1,&xPushButton);
+
+
+
+	xQueue1 = xQueueCreate( 100, sizeof(u8) );
+	xCreatedEventGroup = xEventGroupCreate();
+
+	vSemaphoreCreateBinary(ButtonSemaphore);
+	/*
 	RCC_voidEnablePerClk(RCC_AHB1,21); // enable rcc for DMA1
 	u32 source1DMA[1000] = {0};
 	u32 destination1DMA[1000];
+
 
 	u32 source[1000] = {0};
 	u32 Destination[1000];
@@ -43,7 +126,7 @@ int main(void)
 		Destination[i] = source[i];
 	}
 
-
+*/
 
 
 	/*
@@ -58,10 +141,11 @@ int main(void)
 	//NVIC_voidSetIntPriotity(6,0b1010);
 
 	//NVIC_voidClrPending(6);
-	SET_bit(GPIOA_MODE,0);
-	CLR_bit(GPIOA_MODE,1);
-	SET_bit(GPIOA_ODR,0);
-	STK_voidSingleInterval(1,SingleISR);
+	//SET_bit(GPIOA_MODE,0);
+	//CLR_bit(GPIOA_MODE,1);
+	//RTO_voidCreateTask(0, 1000, Led1);
+	//SET_bit(GPIOA_ODR,0);
+	//STK_voidSingleInterval(1,SingleISR);
 	//A5 LED || C13 Button
 
 	/*
@@ -71,6 +155,7 @@ int main(void)
 	STK_voidBusyWait(1000000);
 	*/
     /* Loop forever */
+	vTaskStartScheduler();
 	while(1)
 	{
 
@@ -82,6 +167,60 @@ int main(void)
 
 	}
 }
+
+
+
+
+
+void PushButton(void * pvparam){
+	 portTickType Freq = 50;
+	 portTickType Start = xTaskGetTickCount();
+	 while (1){
+		 /* if the Push Button is Pressed */
+		 if (GET_bit(GPIOA_IDR,1) == 1){
+				 /*Change the State **/
+				 //xQueueSend( xQueue1,&ButtonState, ( TickType_t ) 0 );
+				 xEventGroupSetBits(xCreatedEventGroup,(1<<0));
+		 }
+
+		 /*Make the Task Periodic with Period 50 Tick */
+		 vTaskDelayUntil(&Start,Freq);
+	 }
+
+ }
+
+
+void Led(void * pvparam){
+	 portTickType Freq = 600;
+	 portTickType Start = xTaskGetTickCount();
+	 EventBits_t uxbits;
+	 while (1){
+
+		 uxbits = xEventGroupGetBits( xCreatedEventGroup );
+		 if(GET_bit(uxbits,0) == 1){
+			 TOG_bit(GPIOA_ODR,0);
+			 xEventGroupClearBits(xCreatedEventGroup,(1<<0));
+		 }
+		 /* if the Push Button is Pressed */
+/*
+			 if (xQueueReceive( xQueue1,&queuebuffer,( TickType_t ) 10 ) == pdTRUE){
+				 if(queuebuffer == 1){
+				 TOG_bit(GPIOA_ODR,0);
+				 queuebuffer = 0;
+				 }
+
+		 }
+		 */
+		 /*Else Delay 1000 Tick till the Resource is Free **/
+
+
+		 /*Make the Task Periodic with Period 50 Tick */
+		 vTaskDelayUntil(&Start,Freq);
+	 }
+
+
+ }
+
 
 
 void _delay_ms(u32 ms)
