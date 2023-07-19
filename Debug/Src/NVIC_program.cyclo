@@ -1,7 +1,0 @@
-NVIC_program.c:10:6:NVIC_voidSetInterruptEnable	3
-NVIC_program.c:23:6:NVIC_voidInit	1
-NVIC_program.c:32:6:NVIC_voidSetInterruptDisable	3
-NVIC_program.c:48:6:NVIC_voidSetPending	3
-NVIC_program.c:61:6:NVIC_voidClrPending	3
-NVIC_program.c:76:4:NVIC_u8GetACtiveFlag	3
-NVIC_program.c:92:6:NVIC_voidSetIntPriotity	1

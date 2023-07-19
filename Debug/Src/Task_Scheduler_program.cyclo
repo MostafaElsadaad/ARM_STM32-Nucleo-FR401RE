@@ -1,3 +1,0 @@
-Task_Scheduler_program.c:15:6:RTO_voidInit	1
-Task_Scheduler_program.c:21:6:RTO_voidCreateTask	1
-Task_Scheduler_program.c:27:13:Scheduler	3

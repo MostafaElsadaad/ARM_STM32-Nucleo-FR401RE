@@ -1,3 +1,0 @@
-../Src/Task_Scheduler_program.c:15:6:RTO_voidInit	8	static
-../Src/Task_Scheduler_program.c:21:6:RTO_voidCreateTask	16	static
-../Src/Task_Scheduler_program.c:27:13:Scheduler	16	static

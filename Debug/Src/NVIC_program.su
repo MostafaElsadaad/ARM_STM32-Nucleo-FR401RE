@@ -1,7 +1,0 @@
-../Src/NVIC_program.c:10:6:NVIC_voidSetInterruptEnable	16	static
-../Src/NVIC_program.c:23:6:NVIC_voidInit	4	static
-../Src/NVIC_program.c:32:6:NVIC_voidSetInterruptDisable	16	static
-../Src/NVIC_program.c:48:6:NVIC_voidSetPending	16	static
-../Src/NVIC_program.c:61:6:NVIC_voidClrPending	16	static
-../Src/NVIC_program.c:76:4:NVIC_u8GetACtiveFlag	24	static
-../Src/NVIC_program.c:92:6:NVIC_voidSetIntPriotity	16	static
